@@ -21,14 +21,14 @@ var fname *string = flag.String("file", "FILE-PATH", "Incoming file")
 
 var outdir string = "OUTDIR"
 
-const mb 			= 1024 * 1024
-const gb 			= 1024 * mb
+const mb 		= 1024 * 1024
+const gb 		= 1024 * mb
 
 var readerSync 		sync.WaitGroup						// to keep track of reader bees go routines
 const readerCount 	= 10
 var readers 		= make([]*Reader, readerCount)
 
-const maxBufR int64 = 10 * mb 							// Reader worker buffer size
+const maxBufR int64 	= 10 * mb 							// Reader worker buffer size
 
 var writerSync 		sync.WaitGroup						// to keep track of worker bees go routines
 const writerCount 	= 10
@@ -36,12 +36,12 @@ var writers 		= make([]*Writer, writerCount)
 
 const maxBufW int64 	= 500 * mb 						// Writer worker buffer size (out file size)
 
-var offsetChan 		= make(chan int64, readerCount)		// values in this chan indicates to zorkers where they have to start reading the file.
-var artChan			= make(chan []string, readerCount)
+var offsetChan 		= make(chan int64, readerCount)				// values in this chan indicates to zorkers where they have to start reading the file.
+var artChan		= make(chan []string, readerCount)
 
 var offsetTrack		= make(chan (int64))
 
-var keys			= []string{"computer", "science", "algorithm", "hardware", "software", "data mining", "database", "operating system", "daemon", "file format", "cryptography", "computing", "concurrency", 
+var keys		= []string{"computer", "science", "algorithm", "hardware", "software", "data mining", "database", "operating system", "daemon", "file format", "cryptography", "computing", "concurrency", 
 								"artificial intelligence", "compiler", "code", "binary", "cipher",
 								"mathematic", "algebra", "number", "conjecture", " pi "} 
 
@@ -56,7 +56,7 @@ type Reader struct {
 
 func NewReader(fsize int64) (w *Reader) {
 	return &Reader{
-		fsize: fsize,									// readers will suicide when asked to read past file size
+		fsize: fsize,							// readers will suicide when asked to read past file size
 	}
 }
 
@@ -124,12 +124,12 @@ func main() {
 	start := time.Now()
 
 
-	var i int64         								// initialize events => Awake readers by feeding offsetChan
+	var i int64         							// initialize events => Awake readers by feeding offsetChan
 	for i = 0; i < readerCount; i++ {
 		offsetChan <- i * maxBufR
 	}
 
-	readerSync.Wait()									// wait for all go routine readers to complete
+	readerSync.Wait()							// wait for all go routine readers to complete
 	writerSync.Wait()
 
 	close(offsetChan)
@@ -160,15 +160,15 @@ func (w *Reader) Read(offsetChan chan int64, maxBufR int64, fname string, artCha
 
 		offset := <- offsetChan
 
-		if offset > w.fsize {							// means EOF, return to close routine
+		if offset > w.fsize {						// means EOF, return to close routine
 			return
 		}
 		
-		f.Seek(offset, 0)								// Move the pointer of the file to the start of designated chunk.
+		f.Seek(offset, 0)						// Move the pointer of the file to the start of designated chunk.
 
 		r := bufio.NewReader(f)
 
-		if offset != 0 {								// Move to a few bytes (till end of word) if offset in the middle of a word 
+		if offset != 0 {						// Move to a few bytes (till end of word) if offset in the middle of a word 
 			_, e = r.ReadBytes(' ')
 			if e == io.EOF {
 				fmt.Println("EOF")
@@ -185,17 +185,17 @@ func (w *Reader) Read(offsetChan chan int64, maxBufR int64, fname string, artCha
 
 		for {
 
-			if localBuf > maxBufR {						// Break if read size has exceed the chunk size.
+			if localBuf > maxBufR {					// Break if read size has exceed the chunk size.
 
-				artChan <- outBuff						// send article to channel for post processing
-				offsetChan <- offset + localBuf  + 1	// send another offset to read in the readers chan
+				artChan <- outBuff				// send article to channel for post processing
+				offsetChan <- offset + localBuf  + 1		// send another offset to read in the readers chan
 				offsetTrack <- offset + localBuf  + 1
 				break
 			}
 
 			b, e := r.ReadBytes(' ')
 
-			if e == io.EOF {							// Break if end of file is encountered.
+			if e == io.EOF {					// Break if end of file is encountered.
 				break
 			}
 
@@ -211,10 +211,10 @@ func (w *Reader) Read(offsetChan chan int64, maxBufR int64, fname string, artCha
 
 				outBuff = append(outBuff, w)			// append word into output buffer
 
-				for {									// looping bytes until article end </page>
+				for {						// looping bytes until article end </page>
 
 					b, e := r.ReadBytes(' ')
-					if e == io.EOF {					// Break if end of file is encountered.
+					if e == io.EOF {			// Break if end of file is encountered.
 						break
 					}
 					if e != nil {
