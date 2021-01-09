@@ -28,7 +28,7 @@ var readerSync 		sync.WaitGroup						// to keep track of reader bees go routines
 const readerCount 	= 10
 var readers 		= make([]*Reader, readerCount)
 
-const maxBufR int64 	= 10 * mb 							// Reader worker buffer size
+const maxBufR int64 	= 10 * mb 						// Reader worker buffer size
 
 var writerSync 		sync.WaitGroup						// to keep track of worker bees go routines
 const writerCount 	= 10
